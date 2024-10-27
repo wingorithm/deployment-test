@@ -16,11 +16,23 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Build and push Docker image
+      - name: Log in to Docker Hub
         run: |
-          docker build -t deployment-test-app .
-          docker run -d -p 8000:8000 --name deployment-test deployment-test-app
+          echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/deployment-test-app:latest .
+
+      - name: Push Docker image to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/deployment-test-app:latest
+
+      - name: Run Docker container
+        run: |
+          docker run -d -p 8000:8000 --name deployment-test ${{ secrets.DOCKER_HUB_USERNAME }}/deployment-test-app:latest
+          docker ps -a
+          
       - name: Download ngrok
         run: |
           sudo curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc > /dev/null
