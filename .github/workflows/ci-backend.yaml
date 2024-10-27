@@ -33,12 +33,6 @@ jobs:
           docker run -d -p 8000:8000 --name deployment-test ${{ secrets.DOCKER_HUB_USERNAME }}/deployment-test-app:latest
           docker ps -a
           
-      - name: Download ngrok
-        run: |
-          sudo curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc > /dev/null
-          echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
-          sudo apt update && sudo apt install -y ngrok
-
       - name: Start ngrok
         uses: luisboto/ngrok-tunnel-action@v0.1.7.2
         with:
