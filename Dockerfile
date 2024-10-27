@@ -1,4 +1,4 @@
-FROM python:3.14-slim
+FROM python:3.14.0a1-slim-bookworm
 
 # Set the working directory inside the container
 WORKDIR /app
