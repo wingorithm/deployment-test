@@ -1,10 +1,5 @@
 FROM python:3.14.0a1-slim-bookworm
 
-RUN apt-get update && apt-get install -y \
-    curl \
-    && curl https://sh.rustup.rs -sSf | sh -s -- -y \
-    && export PATH="$HOME/.cargo/bin:$PATH"
-
 # Set the working directory inside the container
 WORKDIR /app
 
