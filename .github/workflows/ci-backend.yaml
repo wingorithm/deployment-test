@@ -6,7 +6,7 @@ on:
       - release/dev
 
 jobs:
-  build-and-deploy:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,20 +27,3 @@ jobs:
       - name: Push Docker image to Docker Hub
         run: |
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/deployment-test-app:latest
-
-      - name: Create Docker network
-        run: docker network create app-network
-
-      - name: Run Docker container
-        run: |
-          docker run -d --network app-network --name deployment-test ${{ secrets.DOCKER_HUB_USERNAME }}/deployment-test-app:latest
-          docker ps -a
-          sleep 5
-
-      - name: Ngrok Tunnel Action
-        uses: LuisBoto/ngrok-tunnel-action@v0.1.7.2
-        with:
-          timeout: 1h
-          port: 8000
-          ngrok_authtoken: ${{ secrets.NGROK_AUTH_TOKEN }}
-          tunnel_type: http
