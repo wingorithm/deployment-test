@@ -35,13 +35,21 @@ jobs:
           sleep 5
           
       - name: Start ngrok
-        uses: luisboto/ngrok-tunnel-action@v0.1.7.2
-        with:
-          timeout: 1h
-          port: 8000
-          ngrok_authtoken: ${{ secrets.NGROK_AUTH_TOKEN }}
-          tunnel_type: http
-          save_url_to_filename: tunnelURL.md
+        run: |
+          docker run -d --name ngrok \
+            -e NGROK_AUTHTOKEN=${{ secrets.NGROK_AUTH_TOKEN }} \
+            -p 4040:4040 \
+            --network host \
+            ngrok/ngrok http 8000
+          sleep 5
+
+      - name: Wait for ngrok to be ready
+        run: |
+          until curl -s http://127.0.0.1:4040/api/tunnels | jq -e '.tunnels | length > 0'; do
+            echo "Waiting for ngrok to be ready..."
+            sleep 2
+          done
 
       - name: Get ngrok URL
-        run: curl http://127.0.0.1:4040/api/tunnels | jq '.tunnels[0].public_url'
+        run: |
+          curl http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url'
