@@ -36,11 +36,7 @@ jobs:
           
       - name: Start ngrok
         run: |
-          docker run -d --name ngrok \
-            -e NGROK_AUTHTOKEN=${{ secrets.NGROK_AUTH_TOKEN }} \
-            -p 4040:4040 \
-            --network host \
-            ngrok/ngrok http 8000
+          docker run -it -e NGROK_AUTHTOKEN=${{ secrets.NGROK_AUTH_TOKEN }} ngrok/ngrok http 8000 --url=horribly-suited-mongrel.ngrok-free.app
           sleep 5
 
       - name: Wait for ngrok to be ready
