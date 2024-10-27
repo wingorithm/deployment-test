@@ -41,7 +41,7 @@ jobs:
 
       - name: Start ngrok
         run: |
-          ngrok http --url=horribly-suited-mongrel.ngrok-free.app 8000 --authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+          ngrok http 8000 --authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
 
       - name: Get ngrok URL
         run: curl http://127.0.0.1:4040/api/tunnels | jq '.tunnels[0].public_url'
