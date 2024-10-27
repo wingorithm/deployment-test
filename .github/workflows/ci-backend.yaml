@@ -42,5 +42,5 @@ jobs:
         with:
           timeout: 1h
           port: 8000
-          ngrok_authtoken: ${{ secrets.NGROK_AUTHTOKEN }}
+          ngrok_authtoken: ${{ secrets.NGROK_AUTH_TOKEN }}
           tunnel_type: http
