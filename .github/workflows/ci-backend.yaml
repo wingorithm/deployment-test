@@ -40,8 +40,13 @@ jobs:
           sudo apt update && sudo apt install -y ngrok
 
       - name: Start ngrok
-        run: |
-          ngrok http 8000 --authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+          - uses: luisboto/ngrok-tunnel-action@v0.1.7.2
+            with:
+              timeout: 1h
+              port: 8000
+              ngrok_authtoken: ${{ secrets.NGROK_AUTHTOKEN }}
+              tunnel_type: http
+              save_url_to_filename: tunnelURL.md
 
       - name: Get ngrok URL
         run: curl http://127.0.0.1:4040/api/tunnels | jq '.tunnels[0].public_url'
