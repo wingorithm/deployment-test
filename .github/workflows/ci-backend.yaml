@@ -8,7 +8,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 360 # temporarily solution before hosting manually
+    needs: cancel
 
     steps:
       - name: Checkout repository
@@ -29,35 +29,11 @@ jobs:
         run: |
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/deployment-test-app:latest
 
-      - name: Create Docker network
-        run: docker network create app-network
-
-      - name: Run Docker container
-        run: |
-          docker run -d --network app-network --name deployment-test ${{ secrets.DOCKER_HUB_USERNAME }}/deployment-test-app:latest
-          docker ps -a
-          sleep 5
-
-      - name: Install ngrok
-        run: |
-          curl -Lo ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip
-          unzip ngrok.zip
-          chmod +x ngrok
-
-      - name: Start ngrok and keep tunnel alive
-        run: |
-          ./ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
-          ./ngrok http deployment-test:8000 --url=horribly-suited-mongrel.ngrok-free.app &
-          
-          while true; do
-            if ! curl -s http://localhost:4040/api/tunnels > /dev/null; then
-              echo "Ngrok tunnel failed, exiting..."
-              exit 1
-            fi
-            echo "Tunnel active at: $(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url')"
-            sleep 300
-          done
-
-      - name: Get ngrok public URL
-        run: |
-          curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url'
+      - name: ngrok action
+        uses: luisboto/ngrok-tunnel-action@<VERSION>
+        with:
+          timeout: 1h
+          port: 8080
+          ngrok_authtoken: ${{ secrets.NGROK_AUTHTOKEN }}
+          tunnel_type: http
+          save_url_to_filename: tunnelURL.md
