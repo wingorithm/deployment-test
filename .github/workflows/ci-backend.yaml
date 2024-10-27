@@ -6,8 +6,8 @@ on:
       - release/dev
 
 jobs:
-  build-and-deploy: # names of the jobs
-    runs-on: ubuntu-latest #the job run on the latest version of Ubuntu provided by GitHub Actions. This is a virtual machine with various tools and software pre-installed.
+  build-and-deploy:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -28,24 +28,27 @@ jobs:
         run: |
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/deployment-test-app:latest
 
+      - name: Create Docker network
+        run: docker network create app-network
+
       - name: Run Docker container
         run: |
-          docker run -d -p 8000:8000 --name deployment-test ${{ secrets.DOCKER_HUB_USERNAME }}/deployment-test-app:latest
+          docker run -d --network app-network --name deployment-test ${{ secrets.DOCKER_HUB_USERNAME }}/deployment-test-app:latest
           docker ps -a
           sleep 5
-          
+
+      - name: Install ngrok
+        run: |
+          curl -Lo ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip
+          unzip ngrok.zip
+          chmod +x ngrok
+
       - name: Start ngrok
         run: |
-          docker run -it -e NGROK_AUTHTOKEN=${{ secrets.NGROK_AUTH_TOKEN }} ngrok/ngrok http 8000 --url=horribly-suited-mongrel.ngrok-free.app
+          ./ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+          ./ngrok http deployment-test:8000 --log=stdout > ngrok.log &
           sleep 5
 
-      - name: Wait for ngrok to be ready
+      - name: Get ngrok public URL
         run: |
-          until curl -s http://127.0.0.1:4040/api/tunnels | jq -e '.tunnels | length > 0'; do
-            echo "Waiting for ngrok to be ready..."
-            sleep 2
-          done
-
-      - name: Get ngrok URL
-        run: |
-          curl http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url'
+          curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url'
