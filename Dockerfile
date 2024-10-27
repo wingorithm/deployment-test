@@ -5,7 +5,12 @@ WORKDIR /app
 
 # Copy the requirements file and install dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+
+# Upgrade pip and setuptools
+RUN pip install --upgrade pip setuptools
+
+# Install Python dependencies (try using pre-built wheels)
+RUN pip install --no-cache-dir --prefer-binary -r requirements.txt
 
 # Copy the rest of the application files
 COPY . .
