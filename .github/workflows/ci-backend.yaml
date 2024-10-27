@@ -29,8 +29,8 @@ jobs:
         run: |
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/deployment-test-app:latest
 
-      - name: ngrok action
-        uses: luisboto/ngrok-tunnel-action@<VERSION>
+      - name: Ngrok Tunnel Action
+        uses: LuisBoto/ngrok-tunnel-action@v0.1.7.2
         with:
           timeout: 1h
           port: 8080
